@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var header = require('gulp-header');
 var cleanCSS = require('gulp-clean-css');
+var jsonMinify = require('gulp-json-minify');
 var rename = require("gulp-rename");
 var uglify = require('gulp-uglify');
 var pkg = require('./package.json');
@@ -58,17 +59,45 @@ gulp.task('css:compile', function() {
     .pipe(sass.sync({
       outputStyle: 'expanded'
     }).on('error', sass.logError))
-    .pipe(header(banner, {
-      pkg: pkg
-    }))
     .pipe(gulp.dest('./css'))
+});
+
+// Minify JSON
+gulp.task('json:minify', function() {
+  return gulp.src([
+      './steamlibrary/*.json',
+      '!./steamlibrary/*.min.json',	  
+    ])
+    .pipe(jsonMinify())
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('./steamlibrary'))
+    .pipe(browserSync.stream());
+});
+
+// JSON
+gulp.task('json', ['json:minify']);
+
+// Steam Library - Minify CSS
+gulp.task('css:steamlibrary:minify', ['css:compile'], function() {
+  return gulp.src([
+      './steamlibrary/*.css',
+      '!./steamlibrary/*.min.css',	  
+    ])
+    .pipe(cleanCSS())
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('./steamlibrary'))
+    .pipe(browserSync.stream());
 });
 
 // Minify CSS
 gulp.task('css:minify', ['css:compile'], function() {
   return gulp.src([
       './css/*.css',
-      '!./css/*.min.css'
+      '!./css/*.min.css',	  
     ])
     .pipe(cleanCSS())
     .pipe(rename({
@@ -79,30 +108,41 @@ gulp.task('css:minify', ['css:compile'], function() {
 });
 
 // CSS
-gulp.task('css', ['css:compile', 'css:minify']);
+gulp.task('css', ['css:compile', 'css:minify', 'css:steamlibrary:minify']);
 
-// Minify JavaScript
-gulp.task('js:minify', function() {
+// Steam Library - Minify JavaScript
+gulp.task('js:steamlibrary:minify', function() {
   return gulp.src([
-      './js/*.js',
-      '!./js/*.min.js'
+      './steamlibrary/*.js',	  
+      '!./steamlibrary/*.min.js'	  
     ])
     .pipe(uglify())
     .pipe(rename({
       suffix: '.min'
     }))
-    .pipe(header(banner, {
-      pkg: pkg
+    .pipe(gulp.dest('./steamlibrary'))
+    .pipe(browserSync.stream());
+});
+
+// Minify JavaScript
+gulp.task('js:minify', function() {
+  return gulp.src([
+      './js/*.js',
+      '!./js/*.min.js',
+    ])
+    .pipe(uglify())
+    .pipe(rename({
+      suffix: '.min'
     }))
     .pipe(gulp.dest('./js'))
     .pipe(browserSync.stream());
 });
 
 // JS
-gulp.task('js', ['js:minify']);
+gulp.task('js', ['js:minify', 'js:steamlibrary:minify']);
 
 // Default task
-gulp.task('default', ['css', 'js', 'vendor']);
+gulp.task('default', ['css', 'js', 'json', 'vendor']);
 
 // Configure the browserSync task
 gulp.task('browserSync', function() {
