@@ -1,0 +1,2 @@
+div_library.append("<div id='library_head'><div class='user_data'><a href='http://steamcommunity.com/id/mougevit' target='_blank'><img src='http://steamsignature.com/status/brazilian/76561198010203851.png'/></a></div><div id='library_search' style='display:none'></div></div>");
+http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=77FD4D491702D42246D55FC2931F367A&steamid=76561198010203851&include_appinfo=1&include_played_free_games=1&format=json
